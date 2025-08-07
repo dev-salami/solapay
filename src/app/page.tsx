@@ -1,0 +1,224 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+"use client";
+import { Disbursement, User } from "@/interfaces";
+import { useLocalStorage } from "react-use";
+import { PublicKey } from "@solana/web3.js";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Image from "next/image";
+import { nigerianBanks } from "@/component/Register";
+import {
+  encodeDisbursementData,
+  generateDisbursementData,
+  generateQRData,
+  generateQRURL,
+  generateReference,
+} from "@/Payment/utils";
+import { toast } from "sonner";
+import { USD_TO_NAIRA } from "@/Payment/constant";
+import { Base64Utils } from "@/Payment/base64-utils";
+export default function Home() {
+  const [activeUser] = useLocalStorage<User>("activeUser");
+  return (
+    <>
+      <QRGeneratorComponent activeUser={activeUser} />
+    </>
+  );
+}
+
+const QRGeneratorComponent = ({ activeUser }: { activeUser?: User }) => {
+  const [amount, setAmount] = useState("");
+
+  // Calculate USD equivalent in real-time
+  const usdAmount = amount
+    ? (parseFloat(amount) / USD_TO_NAIRA).toFixed(2)
+    : "0.00";
+
+  const handleCreateQR = () => {
+    if (!activeUser) {
+      return;
+    }
+    if (!amount || parseFloat(amount) <= 0) {
+      toast.warning("Please enter a valid amount");
+      return;
+    }
+    const reference = generateReference();
+
+    const memo = generateDisbursementData({
+      reference: new PublicKey(reference),
+      amount: parseFloat(amount),
+      recipientAccountNumber: activeUser.accountNumber,
+      recipientBankCode: activeUser.bankId,
+      description: `Payment for ${activeUser.businessName}`,
+    });
+
+    const memoEncoded = encodeDisbursementData(memo);
+
+    const data = generateQRData({
+      reference: new PublicKey(reference),
+      amountToPay: parseFloat(usdAmount), // Amount in USD
+      label: activeUser.businessName,
+      message: `Payment for ${activeUser.businessName}`,
+      memo: memoEncoded,
+    });
+
+    console.log("QR Data:", data);
+
+    const url = generateQRURL(data);
+
+    // window.location.href = `/pay/${reference}?url=${encodeURIComponent(
+    //   url.toString()
+    // )}`;
+
+    console.log({
+      bankName: getBankName(activeUser.bankId),
+      accountNumber: activeUser.accountNumber,
+      bankId: activeUser.bankId,
+      amountNaira: parseFloat(amount),
+      amountUSD: parseFloat(usdAmount),
+    });
+  };
+
+  // Function to get bank name from bank ID
+  const getBankName = (bankId: string) => {
+    const bank = nigerianBanks.find((b) => b.id === bankId);
+    return bank ? bank.name : "Unknown Bank";
+  };
+  const sampleMemo =
+    "IntcInRyYWNraW5nSWRcIjpcIjZHYUpmMTNzNHJNQ0h1aDdoakdkTG45b0JpOXZZV2ZLVXU3cVVKdUhGNm5UXCIsXCJhbW91bnRcIjozMDAwLFwiY3VycmVuY3lcIjpcIk5HTlwiLFwicmVjaXBpZW50QWNjb3VudE51bWJlclwiOlwiMDUwNDMyNTc2NVwiLFwicmVjaXBpZW50QmFua0NvZGVcIjpcIjA3MDE1MFwiLFwiZGVzY3JpcHRpb25cIjpcIlBheW1lbnQgZm9yIGNpd2F0XCJ9Ig==";
+
+  const decodeMemo = () => {
+    const memoStringified = Base64Utils.decode<string>(sampleMemo);
+
+    const disbursementData: Disbursement = JSON.parse(memoStringified);
+
+    console.log(disbursementData);
+  };
+  // If no active user, show registration prompt
+  if (!activeUser) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Card className="w-full max-w-md">
+          <CardContent className="flex flex-col items-center justify-center p-6">
+            <h2 className="text-xl font-semibold mb-4">Not Registered</h2>
+            <p className="text-gray-600 text-center mb-6">
+              You are not registered. Please proceed to signup to access QR
+              generation.
+            </p>
+            <a
+              href="/login"
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+            >
+              Go to signin
+            </a>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-2xl mx-auto p-6 space-y-6">
+      {/* User Information Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Account Information</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-start gap-4">
+            <Image
+              width={64}
+              height={64}
+              src={`https://res.cloudinary.com/drphqvmfe/image/upload/v1754203697/jeet/venmo-svgrepo-com_pvksx4.svg`}
+              alt="Business Logo"
+              className="w-16 h-16 rounded-lg object-cover"
+            />
+            <div className="flex-1 space-y-2">
+              <div>
+                <Label className="text-sm font-medium text-gray-600">
+                  Business Name
+                </Label>
+                <p className="text-lg font-semibold">
+                  {activeUser.businessName}
+                </p>
+              </div>
+              <div>
+                <Label className="text-sm font-medium text-gray-600">
+                  Account Name
+                </Label>
+                <p className="text-base">{activeUser.accountName}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium text-gray-600">
+                    Bank
+                  </Label>
+                  <p className="text-base">{getBankName(activeUser.bankId)}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-600">
+                    Account Number
+                  </Label>
+                  <p className="text-base font-mono">
+                    {activeUser.accountNumber}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* QR Generator Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Generate QR Code</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="amount" className="text-sm font-medium">
+              Amount (NGN)
+            </Label>
+            <Input
+              id="amount"
+              type="number"
+              placeholder="Enter amount in Naira"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              className="mt-1"
+              min="0"
+              step="0.01"
+            />
+          </div>
+
+          {amount && (
+            <div className="p-3 bg-gray-50 rounded-lg">
+              <Label className="text-sm font-medium text-gray-600">
+                USD Equivalent
+              </Label>
+              <p className="text-lg font-semibold text-green-600">
+                ${usdAmount} USD
+              </p>
+              <p className="text-xs text-gray-500">
+                Conversion rate: 1 USD = {USD_TO_NAIRA} NGN
+              </p>
+            </div>
+          )}
+
+          <Button
+            onClick={handleCreateQR}
+            className="w-full"
+            disabled={!amount || parseFloat(amount) <= 0 || !activeUser}
+          >
+            Create QR
+          </Button>
+
+          <Button onClick={decodeMemo}>Decode memeo</Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
