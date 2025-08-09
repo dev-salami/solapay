@@ -1,25 +1,281 @@
-i have a platform where businesses create account and they will be able to collect payment in naira with their customers paying in stablecoin like usdc,
-the flow is just for them to register and the will be able to create qr code for the customers to scan and then they will proceed to conplete onchain transction which will trigger and offchain disbursement api which will send the naira value of the stablecoin sent by the customer to the merchant account number hwich has been provided when they registered their business
-i want to create endpoint using next js api routes and mongodb and prisma.
-here a list of things i want to
-note that there will be 2 section of the api the admin and the normal user (business) who will sign in using email and password, admin to will have like a master email and password
+# Crypto-to-Naira Platform API Documentation
 
-1. businesses will be able to create account and login, update their profile details and also history for their transactions
-2. there should be endpoint to be called by helius for webhook, which will create a transaction using the parsed memo data from transactions detected by helius in the enpdoint it will then call another endpooint to disburse naira to the bank for the business, all this details will be gotten from the parsed transaction from helius
+## Overview
 
-3. for the admin, we should be able toggle active key on the business profile which will determine if the can receive payment, fetch all users , view transaction summary for each business, fetch all transsaction and filter by date, success and failed
+This platform allows businesses to accept stablecoin payments and receive naira disbursements to their bank accounts.
 
-business have mainly this data
-businessLogo: string | null;
-businessName: string;
-email: string;
-phone: string;
-address: string;
-businessType: string;
-accountNumber: string;
-bankId: string;
-accountName: string;
-password: string;
+## Base URL
 
-any questions ?
-let me answer your question before providing the code
+```
+https://your-domain.com/api
+```
+
+## Authentication
+
+All protected endpoints require a Bearer token in the Authorization header:
+
+```
+Authorization: Bearer <your-jwt-token>
+```
+
+---
+
+## Business Endpoints
+
+### 1. Business Registration
+
+**POST** `/business/auth/register`
+
+Register a new business account.
+
+**Request Body:**
+
+```json
+{
+  "businessLogo": "https://example.com/logo.png", // optional
+  "businessName": "My Business",
+  "email": "business@example.com",
+  "phone": "+234XXXXXXXXXX",
+  "address": "Business Address",
+  "businessType": "E-commerce",
+  "accountNumber": "1234567890",
+  "bankId": "001",
+  "accountName": "Business Account Name",
+  "password": "securePassword123"
+}
+```
+
+**Response:**
+
+```json
+{
+  "message": "Business registered successfully",
+  "data": {
+    "business": {
+      "id": "...",
+      "businessName": "My Business",
+      "email": "business@example.com"
+      // ... other business fields (password excluded)
+    },
+    "token": "jwt-token-here"
+  }
+}
+```
+
+### 2. Business Login
+
+**POST** `/business/auth/login`
+
+**Request Body:**
+
+```json
+{
+  "email": "business@example.com",
+  "password": "securePassword123"
+}
+```
+
+### 3. Get Business Profile
+
+**GET** `/business/profile` (Protected)
+
+Get current business profile information.
+
+### 4. Update Business Profile
+
+**PUT** `/business/profile` (Protected)
+
+**Request Body:**
+
+```json
+{
+  "businessLogo": "https://example.com/new-logo.png",
+  "businessName": "Updated Business Name",
+  "phone": "+234XXXXXXXXXX"
+  // ... other updateable fields
+}
+```
+
+### 5. Get Business Transactions
+
+**GET** `/business/transactions` (Protected)
+
+**Query Parameters:**
+
+- `page` (optional): Page number (default: 1)
+- `limit` (optional): Items per page (default: 10)
+- `status` (optional): Filter by status (PENDING, COMPLETED, FAILED, FINALIZED, RESOLVED)
+
+---
+
+## Webhook Endpoints
+
+### 1. Helius Webhook
+
+**POST** `/webhook/helius`
+
+Receives notifications from Helius when stablecoin transactions are detected.
+
+**Expected Request Body:**
+
+```json
+{
+  "trackingId": "unique-tracking-id",
+  "businessEmail": "business@example.com",
+  "amount_usd": 100.5,
+  "amount_naira": 150750.0,
+  "senderWalletAddress": "wallet-address-here"
+}
+```
+
+### 2. Disbursement Endpoint
+
+**POST** `/disbursement`
+
+Internal endpoint to trigger naira disbursement to business bank accounts.
+
+**Request Body:**
+
+```json
+{
+  "transactionId": "transaction-id-here"
+}
+```
+
+---
+
+## Admin Endpoints
+
+### 1. Admin Login
+
+**POST** `/admin/auth/login`
+
+**Request Body:**
+
+```json
+{
+  "email": "admin@yourcompany.com",
+  "password": "admin-password"
+}
+```
+
+### 2. Get All Businesses
+
+**GET** `/admin/businesses` (Admin Protected)
+
+**Query Parameters:**
+
+- `page` (optional): Page number
+- `limit` (optional): Items per page
+- `search` (optional): Search by business name or email
+
+### 3. Toggle Business Active Status
+
+**PATCH** `/admin/businesses/[id]/toggle-active` (Admin Protected)
+
+**Request Body:**
+
+```json
+{
+  "isActive": true
+}
+```
+
+### 4. Get Business Summary
+
+**GET** `/admin/businesses/[id]/summary` (Admin Protected)
+
+Returns transaction summary for a specific business.
+
+### 5. Get All Transactions
+
+**GET** `/admin/transactions` (Admin Protected)
+
+**Query Parameters:**
+
+- `page` (optional): Page number
+- `limit` (optional): Items per page
+- `status` (optional): Filter by status
+- `businessId` (optional): Filter by business ID
+- `startDate` (optional): Filter from date (ISO string)
+- `endDate` (optional): Filter to date (ISO string)
+- `search` (optional): Search by tracking ID, business name, etc.
+
+### 6. Retry Failed Disbursement
+
+**POST** `/admin/transactions/[id]/retry-disbursement` (Admin Protected)
+
+Manually retry a failed disbursement.
+
+### 7. Dashboard Statistics
+
+**GET** `/admin/dashboard/stats` (Admin Protected)
+
+Returns platform-wide statistics and recent transactions.
+
+---
+
+## Transaction Status Flow
+
+1. **PENDING** - Transaction created from webhook, disbursement in progress
+2. **COMPLETED** - Disbursement successful
+3. **FAILED** - Disbursement failed
+4. **FINALIZED** - Transaction finalized (custom status)
+5. **RESOLVED** - Transaction resolved (custom status)
+
+---
+
+## Error Responses
+
+All endpoints return errors in this format:
+
+```json
+{
+  "message": "Error description"
+}
+```
+
+**Common HTTP Status Codes:**
+
+- `400` - Bad Request (validation errors)
+- `401` - Unauthorized (invalid/missing token)
+- `403` - Forbidden (insufficient permissions)
+- `404` - Not Found
+- `405` - Method Not Allowed
+- `409` - Conflict (duplicate resource)
+- `500` - Internal Server Error
+
+---
+
+## Setup Instructions
+
+1. **Install Dependencies:**
+
+   ```bash
+   npm install
+   ```
+
+2. **Set Environment Variables:**
+   Copy `.env.example` to `.env` and fill in your values.
+
+3. **Setup Database:**
+
+   ```bash
+   npx prisma generate
+   npx prisma db push
+   ```
+
+4. **Run Development Server:**
+   ```bash
+   npm run dev
+   ```
+
+## Database Schema
+
+The platform uses MongoDB with Prisma ORM. See the Prisma schema for complete database structure including:
+
+- `Business` model for business accounts
+- `Transaction` model for payment transactions
+- Proper relationships and indexes
+
+ 
