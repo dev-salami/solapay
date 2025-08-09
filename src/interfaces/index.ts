@@ -35,3 +35,14 @@ export interface Disbursement {
   recipientBankCode: string;
   description: string;
 }
+
+export interface Transaction {
+  trackingId: string;
+  businessName: string;
+  email: string;
+  amount_naira: number;
+  amount_usd: number;
+  recipientAccountNumber: string;
+  recipientBankCode: string;
+  senderWalletAddress: string;
+}

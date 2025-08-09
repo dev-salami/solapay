@@ -5,7 +5,7 @@ here a list of things i want to
 note that there will be 2 section of the api the admin and the normal user (business) who will sign in using email and password, admin to will have like a master email and password
 
 1. businesses will be able to create account and login, update their profile details and also history for their transactions
-2. there should be endpoint to be called by helius for webhook, which will create a transaction using the parsed data from helius in the enpdoint it will then call another endpooint to disburse naira to the bank for the business, all this details will be gotten from the parsed transaction from helius
+2. there should be endpoint to be called by helius for webhook, which will create a transaction using the parsed memo data from transactions detected by helius in the enpdoint it will then call another endpooint to disburse naira to the bank for the business, all this details will be gotten from the parsed transaction from helius
 
 3. for the admin, we should be able toggle active key on the business profile which will determine if the can receive payment, fetch all users , view transaction summary for each business, fetch all transsaction and filter by date, success and failed
 
@@ -20,3 +20,6 @@ accountNumber: string;
 bankId: string;
 accountName: string;
 password: string;
+
+any questions ?
+let me answer your question before providing the code

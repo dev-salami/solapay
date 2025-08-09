@@ -1,9 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
-import { Disbursement, User } from "@/interfaces";
-import { useLocalStorage } from "react-use";
+import { Disbursement } from "@/interfaces";
 import { PublicKey } from "@solana/web3.js";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,17 +18,25 @@ import {
 import { toast } from "sonner";
 import { USD_TO_NAIRA } from "@/Payment/constant";
 import { Base64Utils } from "@/Payment/base64-utils";
+import { useBusinessData } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
 export default function Home() {
-  const [activeUser] = useLocalStorage<User>("activeUser");
   return (
     <>
-      <QRGeneratorComponent activeUser={activeUser} />
+      <QRGeneratorComponent />
     </>
   );
 }
 
-const QRGeneratorComponent = ({ activeUser }: { activeUser?: User }) => {
+const QRGeneratorComponent = () => {
+  const { businessData } = useBusinessData();
+  const [isLoading, setIsLoading] = useState(true);
   const [amount, setAmount] = useState("");
+
+  // Handle hydration by showing loading initially
+  useEffect(() => {
+    setIsLoading(false);
+  }, []);
 
   // Calculate USD equivalent in real-time
   const usdAmount = amount
@@ -38,7 +44,7 @@ const QRGeneratorComponent = ({ activeUser }: { activeUser?: User }) => {
     : "0.00";
 
   const handleCreateQR = () => {
-    if (!activeUser) {
+    if (!businessData) {
       return;
     }
     if (!amount || parseFloat(amount) <= 0) {
@@ -50,9 +56,9 @@ const QRGeneratorComponent = ({ activeUser }: { activeUser?: User }) => {
     const memo = generateDisbursementData({
       reference: new PublicKey(reference),
       amount: parseFloat(amount),
-      recipientAccountNumber: activeUser.accountNumber,
-      recipientBankCode: activeUser.bankId,
-      description: `Payment for ${activeUser.businessName}`,
+      recipientAccountNumber: businessData.accountNumber,
+      recipientBankCode: businessData.bankId,
+      description: `Payment for ${businessData.businessName}`,
     });
 
     const memoEncoded = encodeDisbursementData(memo);
@@ -60,8 +66,8 @@ const QRGeneratorComponent = ({ activeUser }: { activeUser?: User }) => {
     const data = generateQRData({
       reference: new PublicKey(reference),
       amountToPay: parseFloat(usdAmount), // Amount in USD
-      label: activeUser.businessName,
-      message: `Payment for ${activeUser.businessName}`,
+      label: businessData.businessName,
+      message: `Payment for ${businessData.businessName}`,
       memo: memoEncoded,
     });
 
@@ -69,14 +75,14 @@ const QRGeneratorComponent = ({ activeUser }: { activeUser?: User }) => {
 
     const url = generateQRURL(data);
 
-    // window.location.href = `/pay/${reference}?url=${encodeURIComponent(
-    //   url.toString()
-    // )}`;
+    window.location.href = `/pay/${data.reference}?url=${encodeURIComponent(
+      url.toString()
+    )}`;
 
     console.log({
-      bankName: getBankName(activeUser.bankId),
-      accountNumber: activeUser.accountNumber,
-      bankId: activeUser.bankId,
+      bankName: getBankName(businessData.bankId),
+      accountNumber: businessData.accountNumber,
+      bankId: businessData.bankId,
       amountNaira: parseFloat(amount),
       amountUSD: parseFloat(usdAmount),
     });
@@ -87,18 +93,29 @@ const QRGeneratorComponent = ({ activeUser }: { activeUser?: User }) => {
     const bank = nigerianBanks.find((b) => b.id === bankId);
     return bank ? bank.name : "Unknown Bank";
   };
+
   const sampleMemo =
     "IntcInRyYWNraW5nSWRcIjpcIjZHYUpmMTNzNHJNQ0h1aDdoakdkTG45b0JpOXZZV2ZLVXU3cVVKdUhGNm5UXCIsXCJhbW91bnRcIjozMDAwLFwiY3VycmVuY3lcIjpcIk5HTlwiLFwicmVjaXBpZW50QWNjb3VudE51bWJlclwiOlwiMDUwNDMyNTc2NVwiLFwicmVjaXBpZW50QmFua0NvZGVcIjpcIjA3MDE1MFwiLFwiZGVzY3JpcHRpb25cIjpcIlBheW1lbnQgZm9yIGNpd2F0XCJ9Ig==";
 
   const decodeMemo = () => {
     const memoStringified = Base64Utils.decode<string>(sampleMemo);
-
     const disbursementData: Disbursement = JSON.parse(memoStringified);
-
     console.log(disbursementData);
   };
+
+  // Show loading spinner during hydration
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex flex-col items-center space-y-4">
+          <Loader2 size={30} className="  animate-spin" />
+        </div>
+      </div>
+    );
+  }
+
   // If no active user, show registration prompt
-  if (!activeUser) {
+  if (!businessData) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Card className="w-full max-w-md">
@@ -142,28 +159,30 @@ const QRGeneratorComponent = ({ activeUser }: { activeUser?: User }) => {
                   Business Name
                 </Label>
                 <p className="text-lg font-semibold">
-                  {activeUser.businessName}
+                  {businessData.businessName}
                 </p>
               </div>
               <div>
                 <Label className="text-sm font-medium text-gray-600">
                   Account Name
                 </Label>
-                <p className="text-base">{activeUser.accountName}</p>
+                <p className="text-base">{businessData.accountName}</p>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label className="text-sm font-medium text-gray-600">
                     Bank
                   </Label>
-                  <p className="text-base">{getBankName(activeUser.bankId)}</p>
+                  <p className="text-base">
+                    {getBankName(businessData.bankId)}
+                  </p>
                 </div>
                 <div>
                   <Label className="text-sm font-medium text-gray-600">
                     Account Number
                   </Label>
                   <p className="text-base font-mono">
-                    {activeUser.accountNumber}
+                    {businessData.accountNumber}
                   </p>
                 </div>
               </div>
@@ -211,12 +230,12 @@ const QRGeneratorComponent = ({ activeUser }: { activeUser?: User }) => {
           <Button
             onClick={handleCreateQR}
             className="w-full"
-            disabled={!amount || parseFloat(amount) <= 0 || !activeUser}
+            disabled={!amount || parseFloat(amount) <= 0 || !businessData}
           >
             Create QR
           </Button>
 
-          <Button onClick={decodeMemo}>Decode memeo</Button>
+          <Button onClick={decodeMemo}>Decode memo</Button>
         </CardContent>
       </Card>
     </div>

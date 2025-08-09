@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 import React, { useState } from "react";
@@ -9,9 +10,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useLocalStorage } from "react-use";
 import { toast } from "sonner";
+import axios from "axios";
+import { useBusinessData, useToken } from "@/lib/utils";
 
 const LoginForm: React.FC = () => {
-  const [activeUser, setActiveUser] = useLocalStorage<User>("activeUser");
+  const { storeToken } = useToken();
+  const { storeBusinessData } = useBusinessData();
 
   const [users] = useLocalStorage<User[]>("users", []);
   const [formData, setFormData] = useState<LoginFormData>({
@@ -30,29 +34,30 @@ const LoginForm: React.FC = () => {
   };
 
   const handleSubmit = async (): Promise<void> => {
-    setIsLoading(true);
-    setError("");
+    toast.loading("Logging in...", {
+      duration: 0,
+    });
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      const res = await axios.post("/api/business/auth/login", formData);
 
-    // Check if user exists in our mock "database"
-    const user = (users ?? []).find(
-      (u: User) =>
-        u.email === formData.email && u.password === formData.password
-    );
-
-    if (user) {
-      console.log("Login successful:", user);
-      // Here you would typically redirect or update app state
-      toast.success("Login successful!");
-      setActiveUser(user);
+      console.log("Login Response:", res.data);
+      setIsLoading(false);
+      toast.dismiss();
+      toast.success(" Log in successful!", {
+        duration: 3000,
+      });
       window.location.href = "/"; // Redirect to home page
-    } else {
-      toast.error("Invalid email or password");
-    }
+      storeToken(res.data.data.token);
+      storeBusinessData(res.data.data.business);
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      toast.dismiss();
 
-    setIsLoading(false);
+      toast.error(
+        error?.response?.data?.message || "Login failed. Please try again."
+      );
+    }
   };
 
   const containerVariants: Variants = {

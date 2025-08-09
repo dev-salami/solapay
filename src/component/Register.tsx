@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useRef, ChangeEvent } from "react";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import Image from "next/image";
@@ -14,7 +15,9 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
+import axios from "axios";
+import { toast } from "sonner";
+import { useBusinessData, useToken } from "@/lib/utils";
 // Type definitions
 
 // Mock data
@@ -69,13 +72,9 @@ interface Step {
   content: React.ReactNode;
 }
 
-interface BusinessRegistrationFormProps {
-  onComplete: (data: RegisterFormData) => void;
-}
-
-const BusinessRegistrationForm: React.FC<BusinessRegistrationFormProps> = ({
-  onComplete,
-}) => {
+const BusinessRegistrationForm = () => {
+  const { storeToken } = useToken();
+  const { storeBusinessData } = useBusinessData();
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [formData, setFormData] = useState<RegisterFormData>({
@@ -193,13 +192,34 @@ const BusinessRegistrationForm: React.FC<BusinessRegistrationFormProps> = ({
 
   const handleSubmit = async (): Promise<void> => {
     if (validateStep(2)) {
-      setIsLoading(true);
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      toast.loading("Registering your business...", { duration: 0 });
 
-      console.log("Registration Data:", formData);
-      setIsLoading(false);
-      onComplete(formData);
+      try {
+        const res = await axios.post("/api/business/auth/register", {
+          ...formData,
+          businessLogo:
+            "https://res.cloudinary.com/drphqvmfe/image/upload/v1754203697/jeet/venmo-svgrepo-com_pvksx4.svg",
+        });
+
+        console.log("Registration Response:", res.data);
+        setIsLoading(false);
+        toast.dismiss();
+        toast.success("Business registered successfully!", {
+          duration: 3000,
+        });
+        storeToken(res.data.data.token);
+        storeBusinessData(res.data.data.business);
+        // res.data.data.token is the JWT token
+        // res.data.data.business contains the business data
+      } catch (error: any) {
+        console.error("Registration error:", error);
+        toast.dismiss();
+
+        toast.error(
+          error?.response?.data?.message ||
+            "Registration failed. Please try again."
+        );
+      }
     }
   };
 
