@@ -21,7 +21,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import axios from "axios";
 import { toast } from "sonner";
-import { useToken } from "@/lib/utils";
+import { useBusinessData, useToken } from "@/lib/utils";
 import {
   Edit2,
   Save,
@@ -38,7 +38,6 @@ import {
   TrendingUp,
   ArrowUpRight,
   ArrowDownLeft,
-  DollarSign,
   Filter,
   ChevronLeft,
   ChevronRight,
@@ -49,13 +48,7 @@ import {
   AlertCircle,
   Loader2,
 } from "lucide-react";
-
-// Types
-interface Bank {
-  id: string;
-  name: string;
-  code: string;
-}
+import { BANK_LIST } from "@/Payment/bank";
 
 interface BusinessProfile {
   id: string;
@@ -95,41 +88,10 @@ interface TransactionResponse {
   };
 }
 
-// Mock data
-export const nigerianBanks: Bank[] = [
-  { id: "044150", name: "Access Bank", code: "044" },
-  { id: "070150", name: "Fidelity Bank", code: "070" },
-  { id: "011150", name: "First Bank of Nigeria", code: "011" },
-  { id: "058150", name: "Guaranty Trust Bank", code: "058" },
-  { id: "030150", name: "Heritage Bank", code: "030" },
-  { id: "082150", name: "Keystone Bank", code: "082" },
-  { id: "076150", name: "Polaris Bank", code: "076" },
-  { id: "221150", name: "Stanbic IBTC Bank", code: "221" },
-  { id: "232150", name: "Sterling Bank", code: "232" },
-  { id: "033150", name: "United Bank for Africa", code: "033" },
-  { id: "215150", name: "Unity Bank", code: "215" },
-  { id: "035150", name: "Wema Bank", code: "035" },
-  { id: "057150", name: "Zenith Bank", code: "057" },
-];
-
-const businessTypes: string[] = [
-  "Technology/Software",
-  "E-commerce",
-  "Manufacturing",
-  "Healthcare",
-  "Education",
-  "Finance",
-  "Real Estate",
-  "Agriculture",
-  "Transportation",
-  "Hospitality",
-  "Construction",
-  "Consulting",
-  "Other",
-];
-
-const BusinessProfileDashboard = () => {
+const Page = () => {
   const { token } = useToken();
+  const { storeBusinessData } = useBusinessData();
+
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [profile, setProfile] = useState<BusinessProfile | null>(null);
@@ -281,6 +243,9 @@ const BusinessProfileDashboard = () => {
         },
       });
 
+      console.log(response.data.data);
+      storeBusinessData(response.data.data);
+
       setProfile(response.data.data);
       setIsEditing(false);
       setEditData({});
@@ -297,7 +262,7 @@ const BusinessProfileDashboard = () => {
 
   const getBankName = (bankId: string) => {
     return (
-      nigerianBanks.find((bank) => bank.id === bankId)?.name || "Unknown Bank"
+      BANK_LIST.find((bank) => bank.code === bankId)?.name || "Unknown Bank"
     );
   };
 
@@ -601,8 +566,8 @@ const BusinessProfileDashboard = () => {
                                 <SelectValue placeholder="Select bank" />
                               </SelectTrigger>
                               <SelectContent>
-                                {nigerianBanks.map((bank) => (
-                                  <SelectItem key={bank.id} value={bank.id}>
+                                {BANK_LIST.map((bank) => (
+                                  <SelectItem key={bank.id} value={bank.code}>
                                     {bank.name}
                                   </SelectItem>
                                 ))}
@@ -1049,4 +1014,4 @@ const BusinessProfileDashboard = () => {
   );
 };
 
-export default BusinessProfileDashboard;
+export default Page;

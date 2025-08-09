@@ -29,7 +29,11 @@ export interface LoginFormData {
 
 export interface Disbursement {
   trackingId: string;
-  amount: number; // Amount in the smallest unit (e.g., kobo)
+  businessName: string;
+  businessEmail: string;
+  amountNaira: number;
+  amountUSD: number;
+  rate: number;
   currency: string;
   recipientAccountNumber: string;
   recipientBankCode: string;

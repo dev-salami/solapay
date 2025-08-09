@@ -3,7 +3,6 @@ import React, { useState, useRef, ChangeEvent } from "react";
 import { motion, AnimatePresence, Variants } from "framer-motion";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
-import { Bank } from "@/interfaces";
 import { Label } from "@/components/ui/label";
 import { RegisterFormData } from "@/interfaces";
 import {
@@ -18,24 +17,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import axios from "axios";
 import { toast } from "sonner";
 import { useBusinessData, useToken } from "@/lib/utils";
+import { BANK_LIST } from "@/Payment/bank";
 // Type definitions
 
 // Mock data
-export const nigerianBanks: Bank[] = [
-  { id: "044150", name: "Access Bank", code: "044" },
-  { id: "070150", name: "Fidelity Bank", code: "070" },
-  { id: "011150", name: "First Bank of Nigeria", code: "011" },
-  { id: "058150", name: "Guaranty Trust Bank", code: "058" },
-  { id: "030150", name: "Heritage Bank", code: "030" },
-  { id: "082150", name: "Keystone Bank", code: "082" },
-  { id: "076150", name: "Polaris Bank", code: "076" },
-  { id: "221150", name: "Stanbic IBTC Bank", code: "221" },
-  { id: "232150", name: "Sterling Bank", code: "232" },
-  { id: "033150", name: "United Bank for Africa", code: "033" },
-  { id: "215150", name: "Unity Bank", code: "215" },
-  { id: "035150", name: "Wema Bank", code: "035" },
-  { id: "057150", name: "Zenith Bank", code: "057" },
-];
 
 const businessTypes: string[] = [
   "Technology/Software",
@@ -374,8 +359,8 @@ const BusinessRegistrationForm = () => {
                 <SelectValue placeholder="Choose your bank" />
               </SelectTrigger>
               <SelectContent>
-                {nigerianBanks.map((bank) => (
-                  <SelectItem key={bank.id} value={bank.id}>
+                {BANK_LIST.map((bank) => (
+                  <SelectItem key={bank.id} value={bank.code}>
                     {bank.name}
                   </SelectItem>
                 ))}

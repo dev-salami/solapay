@@ -83,7 +83,7 @@ const Navbar = () => {
                   className={cn(
                     "text-sm font-medium transition-colors hover:text-primary",
                     isActiveLink(link.href)
-                      ? "text-primary border-b-2 border-primary pb-4"
+                      ? "text-primary border-b-2 border-primary  "
                       : "text-gray-700"
                   )}
                 >
@@ -109,7 +109,7 @@ const Navbar = () => {
           <div className="md:hidden">
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon">
+                <Button className="mt-8" variant="ghost" size="icon">
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>

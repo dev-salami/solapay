@@ -1,5 +1,4 @@
 "use client";
-import { Disbursement } from "@/interfaces";
 import { PublicKey } from "@solana/web3.js";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
-import { nigerianBanks } from "@/component/Register";
 import {
   encodeDisbursementData,
   generateDisbursementData,
@@ -17,9 +15,9 @@ import {
 } from "@/Payment/utils";
 import { toast } from "sonner";
 import { USD_TO_NAIRA } from "@/Payment/constant";
-import { Base64Utils } from "@/Payment/base64-utils";
 import { useBusinessData } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
+import { BANK_LIST } from "@/Payment/bank";
 export default function Home() {
   return (
     <>
@@ -33,7 +31,6 @@ const QRGeneratorComponent = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [amount, setAmount] = useState("");
 
-  // Handle hydration by showing loading initially
   useEffect(() => {
     setIsLoading(false);
   }, []);
@@ -55,7 +52,11 @@ const QRGeneratorComponent = () => {
 
     const memo = generateDisbursementData({
       reference: new PublicKey(reference),
-      amount: parseFloat(amount),
+      amountNaira: parseFloat(amount),
+      amountUSD: parseFloat(usdAmount),
+      businessName: businessData.businessName,
+      businessEmail: businessData.businessEmail,
+      rate: USD_TO_NAIRA,
       recipientAccountNumber: businessData.accountNumber,
       recipientBankCode: businessData.bankId,
       description: `Payment for ${businessData.businessName}`,
@@ -78,29 +79,12 @@ const QRGeneratorComponent = () => {
     window.location.href = `/pay/${data.reference}?url=${encodeURIComponent(
       url.toString()
     )}`;
-
-    console.log({
-      bankName: getBankName(businessData.bankId),
-      accountNumber: businessData.accountNumber,
-      bankId: businessData.bankId,
-      amountNaira: parseFloat(amount),
-      amountUSD: parseFloat(usdAmount),
-    });
   };
 
   // Function to get bank name from bank ID
   const getBankName = (bankId: string) => {
-    const bank = nigerianBanks.find((b) => b.id === bankId);
+    const bank = BANK_LIST.find((b) => b.code === bankId);
     return bank ? bank.name : "Unknown Bank";
-  };
-
-  const sampleMemo =
-    "IntcInRyYWNraW5nSWRcIjpcIjZHYUpmMTNzNHJNQ0h1aDdoakdkTG45b0JpOXZZV2ZLVXU3cVVKdUhGNm5UXCIsXCJhbW91bnRcIjozMDAwLFwiY3VycmVuY3lcIjpcIk5HTlwiLFwicmVjaXBpZW50QWNjb3VudE51bWJlclwiOlwiMDUwNDMyNTc2NVwiLFwicmVjaXBpZW50QmFua0NvZGVcIjpcIjA3MDE1MFwiLFwiZGVzY3JpcHRpb25cIjpcIlBheW1lbnQgZm9yIGNpd2F0XCJ9Ig==";
-
-  const decodeMemo = () => {
-    const memoStringified = Base64Utils.decode<string>(sampleMemo);
-    const disbursementData: Disbursement = JSON.parse(memoStringified);
-    console.log(disbursementData);
   };
 
   // Show loading spinner during hydration
@@ -234,8 +218,6 @@ const QRGeneratorComponent = () => {
           >
             Create QR
           </Button>
-
-          <Button onClick={decodeMemo}>Decode memo</Button>
         </CardContent>
       </Card>
     </div>

@@ -1,40 +1,50 @@
 // app/api/webhook/helius/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, TransactionStatus } from "@prisma/client";
+import {
+  parseSolanaTransaction,
+  SolanaTransfer,
+} from "@/Payment/helius-webhook-utils";
+import { Base64Utils } from "@/Payment/base64-utils";
+import { Disbursement } from "@/interfaces";
 
 const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
     // Extract transaction data from Helius webhook
-    const webhookData = await request.json();
+    const webhookData: SolanaTransfer = await request.json();
+    const parsedWebhookData = parseSolanaTransaction(webhookData);
 
-    // Basic parsing - customize this based on actual Helius format
-    const {
-      trackingId,
-      businessEmail,
-      amount_usd,
-      amount_naira,
-      senderWalletAddress,
-      // Add other fields as needed from memo data
-    } = webhookData;
-
-    if (
-      !trackingId ||
-      !businessEmail ||
-      !amount_usd ||
-      !amount_naira ||
-      !senderWalletAddress
-    ) {
+    const memoStringified = Base64Utils.decode<string>(
+      parsedWebhookData.memo || ""
+    );
+    const memoData: Disbursement = JSON.parse(memoStringified);
+    if (!memoData) {
       return NextResponse.json(
         { message: "Missing required transaction data" },
         { status: 400 }
       );
     }
 
+    const new_transaction = {
+      trackingId: parsedWebhookData.transactionReference,
+      businessName: memoData.businessName,
+      email: memoData.businessEmail,
+      amount_naira: memoData.amountNaira,
+      amount_usd: memoData.amountUSD,
+      recipientAccountNumber: memoData.recipientAccountNumber,
+      recipientBankCode: memoData.recipientBankCode,
+      senderWalletAddress: parsedWebhookData.walletAddress,
+      status: TransactionStatus.PENDING,
+      business: {
+        connect: { email: memoData.businessEmail },
+      },
+    };
+
     // Find the business
     const business = await prisma.business.findUnique({
-      where: { email: businessEmail },
+      where: { email: memoData.businessEmail },
     });
 
     if (!business) {
@@ -53,18 +63,7 @@ export async function POST(request: NextRequest) {
 
     // Create transaction record
     const transaction = await prisma.transaction.create({
-      data: {
-        trackingId,
-        businessName: business.businessName,
-        email: business.email,
-        amount_naira,
-        amount_usd,
-        recipientAccountNumber: business.accountNumber,
-        recipientBankCode: business.bankId,
-        senderWalletAddress,
-        businessId: business.id,
-        status: "PENDING",
-      },
+      data: new_transaction,
     });
 
     // Trigger disbursement
@@ -88,7 +87,7 @@ export async function POST(request: NextRequest) {
       // Update transaction status to failed
       await prisma.transaction.update({
         where: { id: transaction.id },
-        data: { status: "FAILED" },
+        data: { status: TransactionStatus.FAILED },
       });
     }
 
