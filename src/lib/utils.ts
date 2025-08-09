@@ -38,14 +38,7 @@ export const useBusinessData = () => {
   };
 };
 
-export const useLogout = () => {
-  const { removeToken } = useToken();
-  const { removeBusinessData } = useBusinessData();
-
-  const logout = () => {
-    removeToken();
-    removeBusinessData();
-  };
-
-  return { logout };
+export const logout = () => {
+  window.localStorage.removeItem("auth_token");
+  window.localStorage.removeItem("business_data");
 };

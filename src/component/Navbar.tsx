@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
-import { cn, useLogout, useToken } from "@/lib/utils";
+import { cn, logout, useToken } from "@/lib/utils";
 import {
   Sheet,
   SheetContent,
@@ -17,7 +17,6 @@ import { toast } from "sonner";
 
 const Navbar = () => {
   const { token } = useToken();
-  const { logout } = useLogout();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
