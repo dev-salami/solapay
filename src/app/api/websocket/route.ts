@@ -1,18 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // app/api/websocket/route.ts
 import { NextRequest } from "next/server";
-import WebSocket from "ws";
+import { WebSocket, WebSocketServer } from "ws";
 
 // Store active WebSocket connections by transaction reference
 const connections = new Map<string, Set<WebSocket>>();
 
 // Create WebSocket server instance (this will be shared)
-let wss: WebSocket.Server | null = null;
+let wss: WebSocketServer | null = null;
 
 function initializeWebSocketServer() {
   if (!wss) {
-    wss = new WebSocket.Server({ port: 3000 });
+    wss = new WebSocketServer({ port: 3000 });
 
     wss.on("connection", (ws, request) => {
       console.log("New WebSocket connection");
@@ -73,29 +72,29 @@ function initializeWebSocketServer() {
 }
 
 // Function to broadcast updates to subscribers
-export function broadcastTransactionUpdate(
-  transactionReference: string,
-  transactionData: any
-) {
-  if (connections.has(transactionReference)) {
-    const subscribers = connections.get(transactionReference)!;
-    const message = JSON.stringify({
-      type: "transaction_update",
-      transactionReference,
-      data: transactionData,
-    });
+// export function broadcastTransactionUpdate(
+//   transactionReference: string,
+//   transactionData: any
+// ) {
+//   if (connections.has(transactionReference)) {
+//     const subscribers = connections.get(transactionReference)!;
+//     const message = JSON.stringify({
+//       type: "transaction_update",
+//       transactionReference,
+//       data: transactionData,
+//     });
 
-    subscribers.forEach((ws) => {
-      if (ws.readyState === ws.OPEN) {
-        ws.send(message);
-      }
-    });
+//     subscribers.forEach((ws) => {
+//       if (ws.readyState === ws.OPEN) {
+//         ws.send(message);
+//       }
+//     });
 
-    console.log(
-      `Broadcasted update for transaction ${transactionReference} to ${subscribers.size} subscribers`
-    );
-  }
-}
+//     console.log(
+//       `Broadcasted update for transaction ${transactionReference} to ${subscribers.size} subscribers`
+//     );
+//   }
+// }
 
 // Initialize WebSocket server when this module is loaded
 initializeWebSocketServer();

@@ -74,9 +74,9 @@ export async function GET(
 }
 
 // Export the broadcast function for use in other routes
-export function broadcastTransactionUpdate(
-  transactionReference: string,
-  transactionData: any
-) {
-  return sseStore.broadcastToTransaction(transactionReference, transactionData);
-}
+// export function broadcastTransactionUpdate(
+//   transactionReference: string,
+//   transactionData: any
+// ) {
+//   return sseStore.broadcastToTransaction(transactionReference, transactionData);
+// }

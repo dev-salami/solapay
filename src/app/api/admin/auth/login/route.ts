@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     }
 
     const token = generateToken({
-      email: ADMIN_EMAIL,
+      business_email: ADMIN_EMAIL,
       role: "admin",
     });
 

@@ -66,7 +66,7 @@ const BusinessRegistrationForm = () => {
     // Step 1: Business Details
     businessLogo: null,
     business_name: "",
-    email: "",
+    business_email: "",
     phone: "",
     address: "",
     businessType: "",
@@ -143,7 +143,7 @@ const BusinessRegistrationForm = () => {
       case 0:
         return !!(
           formData.business_name &&
-          formData.email &&
+          formData.business_email &&
           formData.phone &&
           formData.address &&
           formData.businessType
@@ -288,13 +288,15 @@ const BusinessRegistrationForm = () => {
           </div>
 
           <div>
-            <Label htmlFor="email">Email Address *</Label>
+            <Label htmlFor="business_email">Email Address *</Label>
             <Input
-              id="email"
-              type="email"
+              id="business_email"
+              type="business_email"
               placeholder="business@example.com"
-              value={formData.email}
-              onChange={(e) => handleInputChange("email", e.target.value)}
+              value={formData.business_email}
+              onChange={(e) =>
+                handleInputChange("business_email", e.target.value)
+              }
             />
           </div>
 
@@ -413,8 +415,8 @@ const BusinessRegistrationForm = () => {
             <Label htmlFor="emailAuth">Email Address</Label>
             <Input
               id="emailAuth"
-              type="email"
-              value={formData.email}
+              type="business_email"
+              value={formData.business_email}
               onChange={() => {}} // Disabled input
               disabled
               className="bg-gray-50"
@@ -636,7 +638,7 @@ const BusinessRegistrationForm = () => {
 //             <div className="space-y-1">
 //               {users.map((user: User) => (
 //                 <p key={user.id} className="text-xs text-gray-600">
-//                   {user.email} - {user.business_name}
+//                   {user.business_email} - {user.business_name}
 //                 </p>
 //               ))}
 //             </div>

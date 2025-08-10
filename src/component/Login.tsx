@@ -19,7 +19,7 @@ const LoginForm: React.FC = () => {
 
   const [users] = useLocalStorage<User[]>("users", []);
   const [formData, setFormData] = useState<LoginFormData>({
-    email: "",
+    business_email: "",
     password: "",
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -96,10 +96,12 @@ const LoginForm: React.FC = () => {
               <Label htmlFor="loginEmail">Email Address</Label>
               <Input
                 id="loginEmail"
-                type="email"
-                placeholder="your@email.com"
-                value={formData.email}
-                onChange={(e) => handleInputChange("email", e.target.value)}
+                type="business_email"
+                placeholder="your@business_email.com"
+                value={formData.business_email}
+                onChange={(e) =>
+                  handleInputChange("business_email", e.target.value)
+                }
                 required
               />
             </div>
@@ -129,7 +131,9 @@ const LoginForm: React.FC = () => {
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button
                 className="w-full"
-                disabled={isLoading || !formData.email || !formData.password}
+                disabled={
+                  isLoading || !formData.business_email || !formData.password
+                }
                 onClick={handleSubmit}
               >
                 {isLoading ? "Signing in..." : "Sign In"}
