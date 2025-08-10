@@ -52,23 +52,25 @@ const QRGeneratorComponent = () => {
 
     const memo = generateDisbursementData({
       reference: new PublicKey(reference),
-      amountNaira: parseFloat(amount),
-      amountUSD: parseFloat(usdAmount),
-      businessName: businessData.businessName,
-      businessEmail: businessData.businessEmail,
+      amount_naira: parseFloat(amount),
+      amount_usd: parseFloat(usdAmount),
+      business_name: businessData.business_name,
+      business_email: businessData.email,
       rate: USD_TO_NAIRA,
-      recipientAccountNumber: businessData.accountNumber,
+      recipientAccountNumber: businessData.account_number,
       recipientBankCode: businessData.bankId,
-      description: `Payment for ${businessData.businessName}`,
+      description: `Payment for ${businessData.business_name}`,
     });
+
+    console.log(memo);
 
     const memoEncoded = encodeDisbursementData(memo);
 
     const data = generateQRData({
       reference: new PublicKey(reference),
       amountToPay: parseFloat(usdAmount), // Amount in USD
-      label: businessData.businessName,
-      message: `Payment for ${businessData.businessName}`,
+      label: businessData.business_name,
+      message: `Payment for ${businessData.business_name}`,
       memo: memoEncoded,
     });
 
@@ -143,7 +145,7 @@ const QRGeneratorComponent = () => {
                   Business Name
                 </Label>
                 <p className="text-lg font-semibold">
-                  {businessData.businessName}
+                  {businessData.business_name}
                 </p>
               </div>
               <div>
@@ -166,7 +168,7 @@ const QRGeneratorComponent = () => {
                     Account Number
                   </Label>
                   <p className="text-base font-mono">
-                    {businessData.accountNumber}
+                    {businessData.account_number}
                   </p>
                 </div>
               </div>

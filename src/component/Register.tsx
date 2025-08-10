@@ -65,14 +65,14 @@ const BusinessRegistrationForm = () => {
   const [formData, setFormData] = useState<RegisterFormData>({
     // Step 1: Business Details
     businessLogo: null,
-    businessName: "",
+    business_name: "",
     email: "",
     phone: "",
     address: "",
     businessType: "",
 
     // Step 2: Bank Details
-    accountNumber: "",
+    account_number: "",
     bankId: "",
     accountName: "",
 
@@ -102,10 +102,10 @@ const BusinessRegistrationForm = () => {
   };
 
   const simulateBankValidation = async (
-    accountNumber: string,
+    account_number: string,
     bankId: string
   ): Promise<string | null> => {
-    if (accountNumber.length === 10 && bankId) {
+    if (account_number.length === 10 && bankId) {
       setIsLoading(true);
       // Simulate API call delay
       await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -120,14 +120,14 @@ const BusinessRegistrationForm = () => {
   };
 
   const handleBankDetailsChange = async (
-    field: "accountNumber" | "bankId",
+    field: "account_number" | "bankId",
     value: string
   ): Promise<void> => {
     handleInputChange(field, value);
 
-    if (field === "accountNumber" || field === "bankId") {
+    if (field === "account_number" || field === "bankId") {
       const currentAccountNumber =
-        field === "accountNumber" ? value : formData.accountNumber;
+        field === "account_number" ? value : formData.account_number;
       const currentBankId = field === "bankId" ? value : formData.bankId;
 
       if (currentAccountNumber.length === 10 && currentBankId) {
@@ -142,7 +142,7 @@ const BusinessRegistrationForm = () => {
     switch (step) {
       case 0:
         return !!(
-          formData.businessName &&
+          formData.business_name &&
           formData.email &&
           formData.phone &&
           formData.address &&
@@ -150,7 +150,7 @@ const BusinessRegistrationForm = () => {
         );
       case 1:
         return !!(
-          formData.accountNumber.length === 10 &&
+          formData.account_number.length === 10 &&
           formData.bankId &&
           formData.accountName
         );
@@ -276,13 +276,13 @@ const BusinessRegistrationForm = () => {
           </div>
 
           <div>
-            <Label htmlFor="businessName">Business Name *</Label>
+            <Label htmlFor="business_name">Business Name *</Label>
             <Input
-              id="businessName"
+              id="business_name"
               placeholder="Enter your business name"
-              value={formData.businessName}
+              value={formData.business_name}
               onChange={(e) =>
-                handleInputChange("businessName", e.target.value)
+                handleInputChange("business_name", e.target.value)
               }
             />
           </div>
@@ -369,14 +369,14 @@ const BusinessRegistrationForm = () => {
           </div>
 
           <div>
-            <Label htmlFor="accountNumber">Account Number *</Label>
+            <Label htmlFor="account_number">Account Number *</Label>
             <Input
-              id="accountNumber"
+              id="account_number"
               placeholder="Enter 10-digit account number"
-              value={formData.accountNumber}
+              value={formData.account_number}
               onChange={(e) => {
                 const value = e.target.value.replace(/\D/g, "").slice(0, 10);
-                handleBankDetailsChange("accountNumber", value);
+                handleBankDetailsChange("account_number", value);
               }}
               maxLength={10}
             />
@@ -636,7 +636,7 @@ const BusinessRegistrationForm = () => {
 //             <div className="space-y-1">
 //               {users.map((user: User) => (
 //                 <p key={user.id} className="text-xs text-gray-600">
-//                   {user.email} - {user.businessName}
+//                   {user.email} - {user.business_name}
 //                 </p>
 //               ))}
 //             </div>

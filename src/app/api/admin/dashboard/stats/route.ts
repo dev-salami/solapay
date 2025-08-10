@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
       include: {
         business: {
           select: {
-            businessName: true,
+            business_name: true,
             email: true,
           },
         },

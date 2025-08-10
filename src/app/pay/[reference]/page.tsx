@@ -3,6 +3,7 @@ import SolanaPay from "@/Payment/SolanaPay";
 import { useParams, useSearchParams } from "next/navigation";
 import React from "react";
 import { PublicKey } from "@solana/web3.js";
+import TransactionMonitor from "@/component/TransactionMonitor";
 
 function Payment() {
   const { reference } = useParams();
@@ -13,14 +14,12 @@ function Payment() {
   return (
     <div>
       {" "}
-      {
-        <SolanaPay
-          url={url as URL | null}
-          paymentReference={reference ? new PublicKey(reference) : null}
-          usdValue={1}
-        />
-      }{" "}
-      {reference}
+      <SolanaPay
+        url={url as URL | null}
+        paymentReference={reference ? new PublicKey(reference) : null}
+        usdValue={1}
+      />
+      <TransactionMonitor reference={reference as string} />
     </div>
   );
 }

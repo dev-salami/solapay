@@ -11,12 +11,12 @@ datasource db {
 model Business {
   id           String @id @default(auto()) @map("_id") @db.ObjectId
   businessLogo String?
-  businessName String
+  business_name String
   email        String @unique
   phone        String
   address      String
   businessType String
-  accountNumber String
+  account_number String
   bankId       String
   accountName  String
   password     String
@@ -32,7 +32,7 @@ model Business {
 model Transaction {
   id                      String @id @default(auto()) @map("_id") @db.ObjectId
   trackingId             String @unique
-  businessName           String
+  business_name           String
   email                  String
   amount_naira           Float
   amount_usd             Float

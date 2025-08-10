@@ -15,7 +15,7 @@ async function callDisbursementAPI(transactionData: any) {
       Authorization: `Bearer ${process.env.DISBURSEMENT_API_KEY}`,
     },
     body: JSON.stringify({
-      accountNumber: transactionData.recipientAccountNumber,
+      account_number: transactionData.recipientAccountNumber,
       bankCode: transactionData.recipientBankCode,
       amount: transactionData.amount_naira,
       reference: transactionData.trackingId,

@@ -49,31 +49,20 @@ import {
   Loader2,
 } from "lucide-react";
 import { BANK_LIST } from "@/Payment/bank";
+import { Transaction } from "@/interfaces";
 
 interface BusinessProfile {
   id: string;
   businessLogo: string;
-  businessName: string;
-  email: string;
+  business_name: string;
+  business_email: string;
   phone: string;
   address: string;
   businessType: string;
-  accountNumber: string;
+  account_number: string;
   bankId: string;
   accountName: string;
   isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface Transaction {
-  id: string;
-  amount: number;
-  type: "CREDIT" | "DEBIT";
-  status: "PENDING" | "COMPLETED" | "FAILED";
-  description: string;
-  reference: string;
-  businessId: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -163,18 +152,8 @@ const Page = () => {
       // Calculate stats
       const stats = data.transactions.reduce(
         (acc, transaction) => {
-          if (
-            transaction.type === "CREDIT" &&
-            transaction.status === "COMPLETED"
-          ) {
-            acc.totalCredit += transaction.amount;
-          }
-          if (
-            transaction.type === "DEBIT" &&
-            transaction.status === "COMPLETED"
-          ) {
-            acc.totalDebit += transaction.amount;
-          }
+          acc.totalCredit += transaction.amount_naira;
+
           if (transaction.status === "PENDING") {
             acc.pendingCount++;
           }
@@ -377,8 +356,8 @@ const Page = () => {
                       <div>
                         <CardTitle className="text-2xl">
                           {isEditing
-                            ? editData.businessName || profile.businessName
-                            : profile.businessName}
+                            ? editData.business_name || profile.business_name
+                            : profile.business_name}
                         </CardTitle>
                         <div className="flex items-center space-x-2 mt-2">
                           <Badge
@@ -491,13 +470,13 @@ const Page = () => {
 
                           {/* Business Name */}
                           <div>
-                            <Label htmlFor="businessName">Business Name</Label>
+                            <Label htmlFor="business_name">Business Name</Label>
                             <Input
-                              id="businessName"
-                              value={editData.businessName || ""}
+                              id="business_name"
+                              value={editData.business_name || ""}
                               onChange={(e) =>
                                 handleInputChange(
-                                  "businessName",
+                                  "business_name",
                                   e.target.value
                                 )
                               }
@@ -577,17 +556,17 @@ const Page = () => {
 
                           {/* Account Number */}
                           <div>
-                            <Label htmlFor="accountNumber">
+                            <Label htmlFor="account_number">
                               Account Number
                             </Label>
                             <Input
-                              id="accountNumber"
-                              value={editData.accountNumber || ""}
+                              id="account_number"
+                              value={editData.account_number || ""}
                               onChange={(e) => {
                                 const value = e.target.value
                                   .replace(/\D/g, "")
                                   .slice(0, 10);
-                                handleInputChange("accountNumber", value);
+                                handleInputChange("account_number", value);
                               }}
                               maxLength={10}
                               className="mt-1"
@@ -628,7 +607,9 @@ const Page = () => {
                               <Mail className="w-5 h-5 text-blue-500" />
                               <div>
                                 <p className="text-sm text-gray-500">Email</p>
-                                <p className="font-medium">{profile.email}</p>
+                                <p className="font-medium">
+                                  {profile.business_email}
+                                </p>
                               </div>
                             </div>
 
@@ -684,7 +665,7 @@ const Page = () => {
                                   Account Number
                                 </p>
                                 <p className="font-medium font-mono">
-                                  {profile.accountNumber}
+                                  {profile.account_number}
                                 </p>
                               </div>
                             </div>
@@ -918,25 +899,13 @@ const Page = () => {
                           className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
                         >
                           <div className="flex items-center space-x-4">
-                            <div
-                              className={`p-2 rounded-full ${
-                                transaction.type === "CREDIT"
-                                  ? "bg-green-100"
-                                  : "bg-red-100"
-                              }`}
-                            >
-                              {transaction.type === "CREDIT" ? (
-                                <ArrowUpRight className="w-4 h-4 text-green-600" />
-                              ) : (
-                                <ArrowDownLeft className="w-4 h-4 text-red-600" />
-                              )}
+                            <div className={`p-2 rounded-full  bg-gray-100`}>
+                              <ArrowUpRight className={`w-4 h-4  `} />
                             </div>
                             <div>
-                              <p className="font-medium">
-                                {transaction.description || "Transaction"}
-                              </p>
+                              <p className="font-medium">Transaction</p>
                               <p className="text-sm text-gray-500">
-                                Ref: {transaction.reference}
+                                Ref: {transaction.id}
                               </p>
                               <p className="text-xs text-gray-400">
                                 {formatDate(transaction.createdAt)}
@@ -947,14 +916,14 @@ const Page = () => {
                           <div className="flex items-center space-x-4">
                             <div className="text-right">
                               <p
-                                className={`font-bold ${
-                                  transaction.type === "CREDIT"
-                                    ? "text-green-600"
-                                    : "text-red-600"
+                                className={`font-bold bg-white  ${getStatusColor(
+                                  transaction.status
+                                )}
+                               
+                               
                                 }`}
                               >
-                                {transaction.type === "CREDIT" ? "+" : "-"}
-                                {formatCurrency(transaction.amount)}
+                                {formatCurrency(transaction.amount_naira)}
                               </p>
                             </div>
 

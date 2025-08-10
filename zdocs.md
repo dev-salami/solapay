@@ -33,12 +33,12 @@ Register a new business account.
 ```json
 {
   "businessLogo": "https://example.com/logo.png", // optional
-  "businessName": "My Business",
+  "business_name": "My Business",
   "email": "business@example.com",
   "phone": "+234XXXXXXXXXX",
   "address": "Business Address",
   "businessType": "E-commerce",
-  "accountNumber": "1234567890",
+  "account_number": "1234567890",
   "bankId": "001",
   "accountName": "Business Account Name",
   "password": "securePassword123"
@@ -53,7 +53,7 @@ Register a new business account.
   "data": {
     "business": {
       "id": "...",
-      "businessName": "My Business",
+      "business_name": "My Business",
       "email": "business@example.com"
       // ... other business fields (password excluded)
     },
@@ -90,7 +90,7 @@ Get current business profile information.
 ```json
 {
   "businessLogo": "https://example.com/new-logo.png",
-  "businessName": "Updated Business Name",
+  "business_name": "Updated Business Name",
   "phone": "+234XXXXXXXXXX"
   // ... other updateable fields
 }
@@ -121,7 +121,7 @@ Receives notifications from Helius when stablecoin transactions are detected.
 ```json
 {
   "trackingId": "unique-tracking-id",
-  "businessEmail": "business@example.com",
+  "business_email": "business@example.com",
   "amount_usd": 100.5,
   "amount_naira": 150750.0,
   "senderWalletAddress": "wallet-address-here"

@@ -11,12 +11,12 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const {
       businessLogo,
-      businessName,
+      business_name,
       email,
       phone,
       address,
       businessType,
-      accountNumber,
+      account_number,
       bankId,
       accountName,
       password,
@@ -24,12 +24,12 @@ export async function POST(request: NextRequest) {
 
     // Validate required fields
     if (
-      !businessName ||
+      !business_name ||
       !email ||
       !phone ||
       !address ||
       !businessType ||
-      !accountNumber ||
+      !account_number ||
       !bankId ||
       !accountName ||
       !password
@@ -59,12 +59,12 @@ export async function POST(request: NextRequest) {
     const business = await prisma.business.create({
       data: {
         businessLogo,
-        businessName,
+        business_name,
         email,
         phone,
         address,
         businessType,
-        accountNumber,
+        account_number,
         bankId,
         accountName,
         password: hashedPassword,
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
     // Generate token
     const token = generateToken({
       id: business.id,
-      email: business.email,
+      business_email: business.email,
       role: "business",
     });
 

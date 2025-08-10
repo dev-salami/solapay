@@ -24,9 +24,11 @@ export interface MemoData {
  * @param transaction - The Solana transfer transaction from Helius webhook
  * @returns Parsed transaction data including wallet address, memo, transfer amount, and transaction reference
  */
-export function parseSolanaTransaction(
-  transaction: SolanaTransfer
-): ParsedTransactionData {
+export function parseSolanaTransaction({
+  transaction,
+}: {
+  transaction: SolanaTransfer;
+}): ParsedTransactionData {
   try {
     // Extract wallet address (first account key, which is the signer/sender)
     const walletAddress = transaction.transaction.message.accountKeys[0];

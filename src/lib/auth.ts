@@ -5,7 +5,7 @@ import { NextRequest } from "next/server";
 
 export interface JWTPayload {
   id?: string;
-  email: string;
+  business_email: string;
   role: "admin" | "business";
 }
 

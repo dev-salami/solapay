@@ -51,20 +51,20 @@ const generateBase58Encoded32ByteArray = () => {
 
 export const generateDisbursementData = ({
   reference,
-  amountUSD,
-  amountNaira,
-  businessName,
-  businessEmail,
+  amount_usd,
+  amount_naira,
+  business_name,
+  business_email,
   recipientAccountNumber,
   recipientBankCode,
   description,
   rate,
 }: {
   reference: PublicKey;
-  amountUSD: number;
-  amountNaira: number;
-  businessName: string;
-  businessEmail: string;
+  amount_usd: number;
+  amount_naira: number;
+  business_name: string;
+  business_email: string;
   recipientAccountNumber: string;
   recipientBankCode: string;
   description: string;
@@ -72,10 +72,10 @@ export const generateDisbursementData = ({
 }): Disbursement => {
   return {
     trackingId: reference.toString(),
-    amountUSD: amountUSD,
-    amountNaira: amountNaira,
-    businessName: businessName,
-    businessEmail: businessEmail,
+    amount_usd: amount_usd,
+    amount_naira: amount_naira,
+    business_name: business_name,
+    business_email: business_email,
     recipientAccountNumber: recipientAccountNumber || "",
     recipientBankCode: recipientBankCode || "",
     rate: rate,

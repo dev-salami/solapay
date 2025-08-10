@@ -69,9 +69,9 @@ const SolanaPay = ({
     if (element) {
       element.innerHTML = "";
       qrCode.append(element);
-      setTimeout(() => {
-        setAutoCheckEnabled(true);
-      }, 60000);
+      // setTimeout(() => {
+      //   setAutoCheckEnabled(true);
+      // }, 60000);
     }
   }, []);
 

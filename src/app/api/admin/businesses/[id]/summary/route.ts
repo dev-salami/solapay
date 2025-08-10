@@ -26,7 +26,7 @@ export async function GET(
       where: { id },
       select: {
         id: true,
-        businessName: true,
+        business_name: true,
         email: true,
         isActive: true,
         createdAt: true,

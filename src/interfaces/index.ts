@@ -1,3 +1,5 @@
+import { TransactionStatus } from "@prisma/client";
+
 export interface Bank {
   id: string;
   name: string;
@@ -6,12 +8,12 @@ export interface Bank {
 
 export interface RegisterFormData {
   businessLogo: string | null;
-  businessName: string;
-  email: string;
+  business_name: string;
+  business_email: string;
   phone: string;
   address: string;
   businessType: string;
-  accountNumber: string;
+  account_number: string;
   bankId: string;
   accountName: string;
   password: string;
@@ -23,16 +25,16 @@ export interface User extends RegisterFormData {
   createdAt: string;
 }
 export interface LoginFormData {
-  email: string;
+  business_email: string;
   password: string;
 }
 
 export interface Disbursement {
   trackingId: string;
-  businessName: string;
-  businessEmail: string;
-  amountNaira: number;
-  amountUSD: number;
+  business_name: string;
+  business_email: string;
+  amount_naira: number;
+  amount_usd: number;
   rate: number;
   currency: string;
   recipientAccountNumber: string;
@@ -41,12 +43,17 @@ export interface Disbursement {
 }
 
 export interface Transaction {
+  id: string;
   trackingId: string;
-  businessName: string;
+  business_name: string;
+  business_email: string;
   email: string;
+  status: TransactionStatus;
+
   amount_naira: number;
   amount_usd: number;
   recipientAccountNumber: string;
   recipientBankCode: string;
   senderWalletAddress: string;
+  createdAt: string;
 }

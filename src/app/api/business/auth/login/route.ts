@@ -9,9 +9,9 @@ const prisma = new PrismaClient();
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, password } = body;
+    const { business_email, password } = body;
 
-    if (!email || !password) {
+    if (!business_email || !password) {
       return NextResponse.json(
         { message: "Email and password are required" },
         { status: 400 }
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
 
     // Find business
     const business = await prisma.business.findUnique({
-      where: { email },
+      where: { email: business_email },
     });
 
     if (!business) {
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     // Generate token
     const token = generateToken({
       id: business.id,
-      email: business.email,
+      business_email: business.email,
       role: "business",
     });
 

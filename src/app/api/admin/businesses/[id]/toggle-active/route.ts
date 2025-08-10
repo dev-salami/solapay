@@ -47,7 +47,7 @@ export async function PATCH(
       data: { isActive },
       select: {
         id: true,
-        businessName: true,
+        business_name: true,
         email: true,
         isActive: true,
         updatedAt: true,

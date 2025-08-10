@@ -7,14 +7,24 @@ import {
 } from "@/Payment/helius-webhook-utils";
 import { Base64Utils } from "@/Payment/base64-utils";
 import { Disbursement } from "@/interfaces";
+import { sseStore } from "@/lib/sse-store";
 
 const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
+    console.log("Webhook received");
+
     // Extract transaction data from Helius webhook
     const webhookData: SolanaTransfer = await request.json();
-    const parsedWebhookData = parseSolanaTransaction(webhookData);
+    const parsedWebhookData = parseSolanaTransaction({
+      transaction: webhookData,
+    });
+
+    console.log(
+      "Processing transaction with reference:",
+      parsedWebhookData.transactionReference
+    );
 
     const memoStringified = Base64Utils.decode<string>(
       parsedWebhookData.memo || ""
@@ -29,22 +39,22 @@ export async function POST(request: NextRequest) {
 
     const new_transaction = {
       trackingId: parsedWebhookData.transactionReference,
-      businessName: memoData.businessName,
-      email: memoData.businessEmail,
-      amount_naira: memoData.amountNaira,
-      amount_usd: memoData.amountUSD,
+      business_name: memoData.business_email,
+      email: memoData.business_email,
+      amount_naira: memoData.amount_naira,
+      amount_usd: memoData.amount_usd,
       recipientAccountNumber: memoData.recipientAccountNumber,
       recipientBankCode: memoData.recipientBankCode,
       senderWalletAddress: parsedWebhookData.walletAddress,
       status: TransactionStatus.PENDING,
       business: {
-        connect: { email: memoData.businessEmail },
+        connect: { email: memoData.business_email },
       },
     };
 
     // Find the business
     const business = await prisma.business.findUnique({
-      where: { email: memoData.businessEmail },
+      where: { email: memoData.business_email },
     });
 
     if (!business) {
@@ -66,28 +76,75 @@ export async function POST(request: NextRequest) {
       data: new_transaction,
     });
 
-    // Trigger disbursement
-    try {
-      const baseUrl = request.nextUrl.origin;
-      const disbursementResponse = await fetch(`${baseUrl}/api/disbursement`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          transactionId: transaction.id,
-        }),
-      });
+    console.log("Transaction created:", transaction.id);
 
-      if (!disbursementResponse.ok) {
-        throw new Error("Disbursement failed");
+    // Broadcast transaction creation to SSE subscribers
+    console.log("Broadcasting transaction creation...");
+    sseStore.broadcastToTransaction(parsedWebhookData.transactionReference, {
+      id: transaction.id,
+      trackingId: transaction.trackingId,
+      status: transaction.status,
+      amount_naira: transaction.amount_naira,
+      amount_usd: transaction.amount_usd,
+      businessName: transaction.business_name,
+      createdAt: transaction.createdAt,
+      message: "Transaction created successfully",
+    });
+
+    // Trigger disbursement with 4/5 success rate simulation
+    try {
+      // Simulate 4/5 success rate (80% success)
+      const isSuccess = Math.random() < 0.8;
+
+      console.log(
+        "Disbursement simulation result:",
+        isSuccess ? "SUCCESS" : "FAILED"
+      );
+
+      if (isSuccess) {
+        const updatedTransaction = await prisma.transaction.update({
+          where: { id: transaction.id },
+          data: { status: TransactionStatus.COMPLETED },
+        });
+
+        console.log("Broadcasting success update...");
+        // Broadcast success update
+        sseStore.broadcastToTransaction(
+          parsedWebhookData.transactionReference,
+          {
+            id: updatedTransaction.id,
+            trackingId: updatedTransaction.trackingId,
+            status: updatedTransaction.status,
+            amount_naira: updatedTransaction.amount_naira,
+            amount_usd: updatedTransaction.amount_usd,
+            business_name: updatedTransaction.business_name,
+            updatedAt: updatedTransaction.updatedAt,
+            message: "Transaction completed successfully",
+          }
+        );
+      } else {
+        throw new Error("Simulated disbursement failure");
       }
     } catch (disbursementError) {
       console.error("Disbursement error:", disbursementError);
+
       // Update transaction status to failed
-      await prisma.transaction.update({
+      const failedTransaction = await prisma.transaction.update({
         where: { id: transaction.id },
         data: { status: TransactionStatus.FAILED },
+      });
+
+      console.log("Broadcasting failure update...");
+      // Broadcast failure update
+      sseStore.broadcastToTransaction(parsedWebhookData.transactionReference, {
+        id: failedTransaction.id,
+        trackingId: failedTransaction.trackingId,
+        status: failedTransaction.status,
+        amount_naira: failedTransaction.amount_naira,
+        amount_usd: failedTransaction.amount_usd,
+        businessName: failedTransaction.business_name,
+        updatedAt: failedTransaction.updatedAt,
+        message: "Transaction failed during disbursement",
       });
     }
 

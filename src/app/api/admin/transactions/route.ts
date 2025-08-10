@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
     if (search) {
       where.OR = [
         { trackingId: { contains: search, mode: "insensitive" as const } },
-        { businessName: { contains: search, mode: "insensitive" as const } },
+        { business_name: { contains: search, mode: "insensitive" as const } },
         { email: { contains: search, mode: "insensitive" as const } },
         {
           senderWalletAddress: {
@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
         include: {
           business: {
             select: {
-              businessName: true,
+              business_name: true,
               email: true,
               isActive: true,
             },

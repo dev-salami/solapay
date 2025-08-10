@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
       ? {
           OR: [
             {
-              businessName: { contains: search, mode: "insensitive" as const },
+              business_name: { contains: search, mode: "insensitive" as const },
             },
             { email: { contains: search, mode: "insensitive" as const } },
           ],
@@ -41,12 +41,12 @@ export async function GET(request: NextRequest) {
         select: {
           id: true,
           businessLogo: true,
-          businessName: true,
+          business_name: true,
           email: true,
           phone: true,
           address: true,
           businessType: true,
-          accountNumber: true,
+          account_number: true,
           bankId: true,
           accountName: true,
           isActive: true,
