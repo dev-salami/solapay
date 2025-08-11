@@ -1,5 +1,3 @@
-import { TransactionStatus } from "@prisma/client";
-
 export interface Bank {
   id: string;
   name: string;
@@ -56,4 +54,54 @@ export interface Transaction {
   recipientBankCode: string;
   senderWalletAddress: string;
   createdAt: string;
+}
+
+// types/transaction.ts
+export enum TransactionStatus {
+  PENDING = "PENDING",
+  COMPLETED = "COMPLETED",
+  FAILED = "FAILED",
+  FINALIZED = "FINALIZED",
+  RESOLVED = "RESOLVED",
+}
+
+export enum TransactionStage {
+  INITIATING = "initiating",
+  DISBURSING = "disbursing",
+  COMPLETED = "completed",
+  FAILED = "failed",
+}
+
+export interface Transaction {
+  id: string;
+  trackingId: string;
+  business_name: string;
+  email: string;
+  amount_naira: number;
+  amount_usd: number;
+  status: TransactionStatus;
+  recipientAccountNumber: string;
+  recipientBankCode: string;
+  senderWalletAddress: string;
+  createdAt: string;
+  updatedAt: string;
+  businessId: string;
+  business: {
+    business_name: string;
+    email: string;
+    isActive: boolean;
+  };
+}
+
+export interface TransactionApiResponse {
+  message: string;
+  found: boolean;
+  data?: Transaction;
+}
+
+export interface StageConfig {
+  stage: TransactionStage;
+  label: string;
+  description: string;
+  icon: "loading" | "clock" | "check" | "x";
 }

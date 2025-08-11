@@ -8,6 +8,7 @@ import {
 import { Base64Utils } from "@/Payment/base64-utils";
 import { Disbursement } from "@/interfaces";
 import { sseStore } from "@/lib/sse-store";
+import { extractReferencesByExclusion } from "@/Payment/validateTransferUtils";
 
 const prisma = new PrismaClient();
 
@@ -16,9 +17,9 @@ export async function POST(request: NextRequest) {
     console.log("Webhook received");
 
     // Extract transaction data from Helius webhook
-    const webhookData: SolanaTransfer = await request.json();
+    const webhookData: SolanaTransfer[] = await request.json();
     const parsedWebhookData = parseSolanaTransaction({
-      transaction: webhookData,
+      transaction: webhookData[0],
     });
 
     console.log(
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest) {
     }
 
     const new_transaction = {
-      trackingId: parsedWebhookData.transactionReference,
+      trackingId: extractReferencesByExclusion(webhookData[0])[0],
       business_name: memoData.business_email,
       email: memoData.business_email,
       amount_naira: memoData.amount_naira,

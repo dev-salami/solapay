@@ -3,7 +3,7 @@ import SolanaPay from "@/Payment/SolanaPay";
 import { useParams, useSearchParams } from "next/navigation";
 import React from "react";
 import { PublicKey } from "@solana/web3.js";
-import TransactionMonitor from "@/component/TransactionMonitor";
+import TransactionTracker from "@/component/TransactionTracker";
 
 function Payment() {
   const { reference } = useParams();
@@ -19,7 +19,7 @@ function Payment() {
         paymentReference={reference ? new PublicKey(reference) : null}
         usdValue={1}
       />
-      <TransactionMonitor reference={reference as string} />
+      <TransactionTracker trackingId={reference as string} />
     </div>
   );
 }
