@@ -97,6 +97,8 @@ export async function POST(request: NextRequest) {
       // Simulate 4/5 success rate (80% success)
       const isSuccess = Math.random() < 0.8;
 
+      await new Promise((resolve) => setTimeout(resolve, 10000));
+
       console.log(
         "Disbursement simulation result:",
         isSuccess ? "SUCCESS" : "FAILED"
