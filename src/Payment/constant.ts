@@ -11,7 +11,7 @@ export const MAINNET_ENVIRONMENT = false; // "devnet" |  "mainnet-beta"
 export const CONNECTION_URL = MAINNET_ENVIRONMENT
   ? "https://mainnet.helius-rpc.com/?api-key=ef0bff29-b19f-47d8-8ff5-856b998e51a6"
   : "https://devnet.helius-rpc.com/?api-key=ef0bff29-b19f-47d8-8ff5-856b998e51a6";
-export const TREASURY_WALLET = "H7DNE1wz4FfRxyP5eG9T4NEs4WVmniZ88PEvqAsocSdS";
+export const TREASURY_WALLET = "HR3FLto9pAATMceVxAkDKFUoxbZGt4hwwXHPkvTCSGQp";
 const USDC_MAINNET = new PublicKey(
   "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
 );

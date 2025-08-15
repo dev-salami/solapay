@@ -18,26 +18,11 @@ import { USD_TO_NAIRA } from "@/Payment/constant";
 import { useBusinessData } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 import { BANK_LIST } from "@/Payment/bank";
-import {
-  extractReferencesByExclusion,
-  extractReferencesFromTransaction,
-} from "@/Payment/validateTransferUtils";
-import { transfer_transaction, trxn } from "@/Payment/sample";
+
 export default function Home() {
   return (
     <>
       <QRGeneratorComponent />
-
-      <Button
-        onClick={() => console.log(extractReferencesByExclusion(trxn[0]))}
-      >
-        TEST 1
-      </Button>
-      <Button
-        onClick={() => console.log(extractReferencesFromTransaction(trxn[0]))}
-      >
-        TEST 2
-      </Button>
     </>
   );
 }

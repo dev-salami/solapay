@@ -346,12 +346,12 @@ export default function TransactionTracker({
           )}
         </div>
 
-        {isPolling && (
+        {/* {isPolling && (
           <div className="mt-6 flex items-center justify-center text-sm text-gray-500">
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
             Checking status...
           </div>
-        )}
+        )} */}
       </CardContent>
     </Card>
   );

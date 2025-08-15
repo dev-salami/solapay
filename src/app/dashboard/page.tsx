@@ -91,10 +91,10 @@ const Page = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [transactionStats, setTransactionStats] = useState({
-    totalCredit: 0,
-    totalDebit: 0,
-    totalTransactions: 0,
-    pendingCount: 0,
+    creditedBalance: 0,
+    failedBalance: 0,
+    totalBalance: 0,
+    pendingBalance: 0,
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -152,15 +152,26 @@ const Page = () => {
       // Calculate stats
       const stats = data.transactions.reduce(
         (acc, transaction) => {
-          acc.totalCredit += transaction.amount_naira;
+          if (transaction.status === "COMPLETED") {
+            acc.creditedBalance += transaction.amount_naira;
+          }
 
           if (transaction.status === "PENDING") {
-            acc.pendingCount++;
+            acc.pendingBalance += transaction.amount_naira;
           }
-          acc.totalTransactions++;
+
+          if (transaction.status === "FAILED") {
+            acc.failedBalance += transaction.amount_naira;
+          }
+          acc.totalBalance += transaction.amount_naira;
           return acc;
         },
-        { totalCredit: 0, totalDebit: 0, totalTransactions: 0, pendingCount: 0 }
+        {
+          creditedBalance: 0,
+          failedBalance: 0,
+          totalBalance: 0,
+          pendingBalance: 0,
+        }
       );
 
       setTransactionStats(stats);
@@ -336,7 +347,7 @@ const Page = () => {
               transition={{ delay: 0.1 }}
             >
               <Card className="shadow-lg">
-                <CardHeader className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-t-lg">
+                <CardHeader className="   ">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                       <div className="w-16 h-16 bg-white rounded-full p-2">
@@ -381,7 +392,7 @@ const Page = () => {
                           onClick={startEditing}
                           variant="secondary"
                           size="sm"
-                          className="bg-white/20 text-white border-white/30 hover:bg-white/30"
+                          className="bg-gray-800 text-white  hover:bg-gray-700"
                         >
                           <Edit2 className="w-4 h-4 mr-2" />
                           Edit Profile
@@ -401,7 +412,7 @@ const Page = () => {
                             onClick={cancelEditing}
                             variant="outline"
                             size="sm"
-                            className="bg-white/20 text-white border-white/30 hover:bg-white/30"
+                            className="bg-gray-800 text-white  hover:bg-gray-700"
                           >
                             <X className="w-4 h-4 mr-2" />
                             Cancel
@@ -768,9 +779,26 @@ const Page = () => {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-600 mb-1">Total Credit</p>
+                      <p className="text-sm   mb-1 text-blue-500">
+                        Total Balance
+                      </p>
+                      <p className={`text-lg font-bold text-blue-500 `}>
+                        {formatCurrency(transactionStats.totalBalance)}
+                      </p>
+                    </div>
+                    <TrendingUp className="w-8 h-8 text-blue-500" />
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">
+                        Credited Balance
+                      </p>
                       <p className="text-lg font-bold text-green-600">
-                        {formatCurrency(transactionStats.totalCredit)}
+                        {formatCurrency(transactionStats.creditedBalance)}
                       </p>
                     </div>
                     <ArrowUpRight className="w-8 h-8 text-green-500" />
@@ -782,9 +810,11 @@ const Page = () => {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-600 mb-1">Total Debit</p>
+                      <p className="text-sm text-gray-600 mb-1">
+                        Failed Balance
+                      </p>
                       <p className="text-lg font-bold text-red-600">
-                        {formatCurrency(transactionStats.totalDebit)}
+                        {formatCurrency(transactionStats.failedBalance)}
                       </p>
                     </div>
                     <ArrowDownLeft className="w-8 h-8 text-red-500" />
@@ -796,34 +826,11 @@ const Page = () => {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-600 mb-1">Net Balance</p>
-                      <p
-                        className={`text-lg font-bold ${
-                          transactionStats.totalCredit -
-                            transactionStats.totalDebit >=
-                          0
-                            ? "text-green-600"
-                            : "text-red-600"
-                        }`}
-                      >
-                        {formatCurrency(
-                          transactionStats.totalCredit -
-                            transactionStats.totalDebit
-                        )}
+                      <p className="text-sm  mb-1 text-yellow-600">
+                        Pending Balance
                       </p>
-                    </div>
-                    <TrendingUp className="w-8 h-8 text-blue-500" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600 mb-1">Pending</p>
                       <p className="text-lg font-bold text-yellow-600">
-                        {transactionStats.pendingCount}
+                        {formatCurrency(transactionStats.pendingBalance)}
                       </p>
                     </div>
                     <Clock className="w-8 h-8 text-yellow-500" />
