@@ -234,9 +234,9 @@ export default function TransactionTracker({
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span>Transaction Status</span>
-          {transaction && (
+          {/* {transaction && (
             <Badge variant="outline">{transaction.trackingId}</Badge>
-          )}
+          )} */}
         </CardTitle>
         {transaction && (
           <div className="text-sm text-gray-600">
